@@ -4,32 +4,48 @@ local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 
-local function getCoinsModel()
-    local gameFolder = Workspace:FindFirstChild("Game")
-    if gameFolder then
-        return gameFolder:FindFirstChild("Coins")
-    end
-    return nil
-end
-
 task.spawn(function()
     while true do
+    
         local character = player.Character
         if character and character:FindFirstChild("HumanoidRootPart") then
             local hrp = character.HumanoidRootPart
             local originalCFrame = hrp.CFrame
             
-            local coinsModel = getCoinsModel()
+            local gameFolder = Workspace:FindFirstChild("Game")
+            local coinsModel = gameFolder and gameFolder:FindFirstChild("Coins")
+            
             if coinsModel then
+                local foundCoin = false
+                
                 for _, coin in ipairs(coinsModel:GetChildren()) do
-                    if coin.Name == "Coin" and coin:IsA("BasePart") and coin.Parent then
+                    if coin.Name == "Coin" and coin:IsA("MeshPart") and coin.Parent then
+                        foundCoin = true
+                        
+                        
                         hrp.CFrame = coin.CFrame
-                        RunService.Heartbeat:Wait()
+                        coin.CanTouch = true
+                        coin.CanCollide = false
+                        
+                    
+                        local startTime = tick()
+                        while tick() - startTime < 3.0 do
+                            
+                            if not coin.Parent or not player.Character or not player.Character.PrimaryPart then
+                                break
+                            end
+                           
+                            RunService.Heartbeat:Wait()
+                        end
                     end
                 end
-                hrp.CFrame = originalCFrame
+                
+                if foundCoin then
+                    hrp.CFrame = originalCFrame
+                end
             end
         else
+           
             player.CharacterAdded:Wait()
             task.wait(1)
         end
