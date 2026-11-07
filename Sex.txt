@@ -1,1 +1,39 @@
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
 
+local player = Players.LocalPlayer
+
+local function getCoinsModel()
+    local gameFolder = Workspace:FindFirstChild("Game")
+    if gameFolder then
+        return gameFolder:FindFirstChild("Coins")
+    end
+    return nil
+end
+
+task.spawn(function()
+    while true do
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local hrp = character.HumanoidRootPart
+            local originalCFrame = hrp.CFrame
+            
+            local coinsModel = getCoinsModel()
+            if coinsModel then
+                for _, coin in ipairs(coinsModel:GetChildren()) do
+                    if coin.Name == "Coin" and coin:IsA("BasePart") and coin.Parent then
+                        hrp.CFrame = coin.CFrame
+                        RunService.Heartbeat:Wait()
+                    end
+                end
+                hrp.CFrame = originalCFrame
+            end
+        else
+            player.CharacterAdded:Wait()
+            task.wait(1)
+        end
+        
+        task.wait(0.5)
+    end
+end)
